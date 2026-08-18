@@ -1,0 +1,41 @@
+services:
+  postgres:
+    image: postgres:14-alpine
+    container_name: database
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: 1234
+    ports:
+      - "5432:5432"
+    volumes:
+      - sms-data:/var/lib/postgresql/data
+    networks:
+      - student-managment-system
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0.6
+    container_name: keycloak
+    restart: unless-stopped
+    command: start-dev
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: user
+      KC_DB_PASSWORD: 1234
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    volumes:
+      - ./keycloak/themes:/opt/keycloak/themes
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    networks:
+      - student-managment-system
+
+volumes:
+  sms-data:
+
+networks:
+  student-managment-system:
